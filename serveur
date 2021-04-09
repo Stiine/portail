@@ -1,0 +1,79 @@
+#! /bin/bash
+
+# Mise à jours
+sudo apt update
+sudo apt upgrade
+sudo apt update
+
+# Serveur Apache
+sudo apt install apache2
+# droit
+sudo chown -R pi:www-data /var/www/html/
+sudo chmod -R 770 /var/www/html/
+
+# Php
+sudo apt install php php-mbstring
+
+# Mysql
+sudo apt install mariadb-server php-mysql
+# Connection
+sudo mysql --user=root
+# Supprimer l’utilisateur root et créer un nouvel utilisateur root, car celui par défaut n’est utilisable que par le compte administrateur du système, et n’est donc pas accessible aux script PHP du serveur.
+# Creation de l'utilisateur root
+DROP USER 'root'@'localhost';
+# On lui a ajoute un mots de passe
+CREATE USER 'root'@'localhost' IDENTIFIED BY 'Snir2020*';
+# On donne les droits suffisants
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+
+# Phpmyadmin
+sudo apt install phpmyadmin
+# Activer l'extension mysqli
+sudo phpenmod mysqli
+sudo /etc/init.d/apache2 restart
+# Placer phpmyadmin dans /var/www/html/phpmyadmin
+sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+
+# Certificat SSL
+# Mise à jours
+sudo apt update
+# Ouverture des ports http = 80 et https = 443
+sudo ufw allow "Apache Full"
+# Activation mod_ssl
+sudo a2enmod ssl
+# Redemarre serveur apache pour appliquer la modification
+sudo systemctl restart apache2
+# Création du certificat SSL
+# openssl : c'est l'outil de ligne de commande utilisé pour la création et la gestion des certificats, clés et autres fichiers OpenSSL.
+# req -x509 : gestion des demandes de signature de certificats (CSR) X.509, X.509 est une norme d'infrastructure de clé publique.
+# -nodes : cela indique à OpenSSL de ne pas utiliser l'option de sécurisation de notre certificat par une phrase de passe.
+# -days 365 : cette option fixe la durée pendant laquelle le certificat sera considéré comme valide. Ici, nous l'avons fixée pour un an.
+# -newkey : un nouveau certificat et rsa:2048 lui demande de fabriquer une clé RSA de 2048 bits.
+# -keyout : cette ligne indique à OpenSSL où placer le fichier de clé privée généré que nous créons.
+# -out : cela indique à OpenSSL où placer le certificat que nous créons.
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+# Configuration configuration d'Apache pour utiliser SSL
+# On ouvre dans le répertoire.
+sudo nano /etc/apache2/sites-available/172.20.233.59.conf
+# On édite.
+<VirtualHost *:443>
+   ServerName 172.20.233.59
+   DocumentRoot /var/www/172.20.233.59
+
+   SSLEngine on
+   SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+   SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+</VirtualHost>
+
+<VirtualHost *:80>
+    ServerName 172.20.233.59
+    Redirect / https://172.20.233.59/
+</VirtualHost>
+# Activer fichier de configuration
+sudo a2ensite 172.20.233.59.conf
+# Test d'erreurs de configuration
+sudo apache2ctl configtest
+# redemarre seveur apache2
+sudo systemctl reload apache2
+
+
