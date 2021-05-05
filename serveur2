@@ -23,11 +23,11 @@ sudo apt install mysql-server
 sudo mysql --user=root
 # Supprimer l’utilisateur root et créer un nouvel utilisateur root, car celui p>
 # Creation de l'utilisateur root
-sudo mysql -e 'DROP USER 'root'@'localhost'';
+echo "sudo mysql -e 'DROP USER 'root'@'localhost''";
 # On lui a ajoute un mots de passe
-sudo mysql -e 'CREATE USER 'root'@'localhost' IDENTIFIED BY 'Snir2020*'';
+echo "sudo mysql -e 'CREATE USER 'root'@'localhost' IDENTIFIED BY 'Snir2020*''";
 # On donne les droits suffisants
-sudo mysql -e 'GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPT>
+echo "sudo mysql -e 'GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPT>"
 
 # Phpmyadmin
 sudo apt install phpmyadmin
