@@ -78,3 +78,5 @@ sudo a2ensite $ip.conf
 sudo apache2ctl configtest
 # redemarre seveur apache2
 sudo systemctl reload apache2
+
+mv html /var/www
