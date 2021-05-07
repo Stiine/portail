@@ -1,0 +1,84 @@
+imshow("Result", result);
+ waitKey();
+
+ blur(result, result, Size(19, 1));
+ imshow("Result", result);
+ waitKey();
+
+ erode(result, result, Mat(6, 40, CV_8U, 1));
+ imshow("Result", result);
+ waitKey();
+
+ threshold(result, result, 37, 255, THRESH_BINARY);
+ imshow("Result", result);
+ waitKey();
+
+ morphologyEx(result, result, MORPH_OPEN, Mat(7, 7, CV_8U, 1));
+ imshow("Result", result);
+ waitKey();
+
+ dilate(result, result, Mat(18, 106, CV_8U, 1));
+ imshow("Result", result);
+ waitKey();
+
+ vector<vector<Point>> contours;
+ findContours(result, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+ RotatedRect r = minAreaRect(contours[0]);
+ Point2f coins[4];
+ r.points(coins);
+
+ int largeur = r.boundingRect().width;
+ int hauteur = r.boundingRect().height;
+
+ Point2f ajust[4] = {Point(-50, 170), Point(-30, 40), Point(800, -19), Point(800, 150)};
+
+ Mat perpective = getPerspectiveTransform(coins, ajust);
+ Mat plaque;
+
+ warpPerspective(image, plaque, perpective, Size(largeur, hauteur));
+ imshow("Plaque", plaque);
+ waitKey();
+
+ threshold(plaque, plaque, 200, 255, THRESH_BINARY);
+ imshow("Plaque", plaque);
+ waitKey();
+
+ GaussianBlur(plaque, plaque, Size(1, 3), 0);
+ imshow("Plaque", plaque);
+ waitKey();
+
+ resize(plaque, plaque, Size(), 2, 2, INTER_CUBIC);
+ imshow("Plaque", plaque);
+ waitKey();
+
+ TessBaseAPI ocr;
+ ocr.Init(NULL, "fra");
+ ocr.SetImage(plaque.data, plaque.cols, plaque.rows, 1, plaque.step);
+ string numero = ocr.GetUTF8Text();
+ cout << endl << "Plaque brute : " << numero;
+
+
+  switch (1)
+  {
+     case 'A': ("4");
+     break;
+
+     case 'E': ("3");
+     break;
+
+     case 'I': ("1");
+     break;
+
+     case 'D': ("0");
+     break;
+  }
+
+ string correction;
+
+ for (char car : numero)
+    if ((car>='A' && car<='Z') || (car>='0' && car<='9') || car=='-') correction+=car;
+ cout << "Plaque corrigée : " << correction << endl << endl;
+
+ return 0;
+}
