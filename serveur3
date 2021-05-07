@@ -27,7 +27,8 @@ echo "sudo mysql -e 'DROP USER 'root'@'localhost''";
 # On lui a ajoute un mots de passe
 echo "sudo mysql -e 'CREATE USER 'root'@'localhost' IDENTIFIED BY 'Snir2020*''";
 # On donne les droits suffisants
-echo "sudo mysql -e 'GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPT>"
+echo "sudo mysql -e 'GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPT>";
+echo "exit"
 
 # Phpmyadmin
 sudo apt install phpmyadmin
