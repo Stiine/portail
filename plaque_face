@@ -1,0 +1,83 @@
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <tesseract/baseapi.h>
+
+using namespace cv;
+using namespace std;
+using namespace tesseract;
+
+int main()
+{
+    Mat image = imread("/home/snir/Images/face.jpg", IMREAD_GRAYSCALE);
+    imshow("Image", image);
+    waitKey();
+
+    Mat flou;
+    blur(image, flou, Size(5, 3));
+    imshow("Result", flou);
+    waitKey();
+
+    Mat result;
+    Canny(flou, result, 70, 150);
+    imshow("Result", result);
+    waitKey();
+
+    dilate(result, result, Mat());
+    imshow("Result", result);
+    waitKey();
+
+    blur(result, result, Size(100, 1));
+    imshow("Result", result);
+    waitKey();
+
+    erode(result, result, Mat(4, 16, CV_8U, 1));
+    imshow("Result", result);
+    waitKey();
+
+    threshold(result, result, 99, 255, THRESH_BINARY);
+    imshow("Result", result);
+    waitKey();
+
+    morphologyEx(result, result, MORPH_OPEN, Mat(5, 5, CV_8U, 1));
+    imshow("Result", result);
+    waitKey();
+
+    dilate(result, result, Mat(13, 31, CV_8U, 1));
+    imshow("Result", result);
+    waitKey();
+
+    vector<vector<Point>> contours;
+    findContours(result, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+    Rect rect = boundingRect(contours[0]);
+    Mat plaque = image(rect);
+    imshow("Plaque", plaque);
+    waitKey();
+
+    threshold(plaque, plaque, 50, 255, THRESH_BINARY);
+    imshow("Plaque", plaque);
+    waitKey();
+
+    GaussianBlur(plaque, plaque, Size(3, 3), 0);
+    imshow("Plaque", plaque);
+    waitKey();
+
+    resize(plaque, plaque, Size(), 2, 2, INTER_CUBIC);
+    imshow("Plaque", plaque);
+    waitKey();
+
+    TessBaseAPI ocr;
+    ocr.Init(NULL, "fra");
+    ocr.SetImage(plaque.data, plaque.cols, plaque.rows, 1, plaque.step);
+    string numero = ocr.GetUTF8Text();
+
+    cout << endl << "Plaque brute : " << numero;
+
+    string correction;
+    for (char car : numero)
+        if ((car>='A' && car<='Z') || (car>='0' && car<='9') || car=='-') correction+=car;
+
+    cout << "Plaque corrigée : " << correction << endl << endl;
+
+    return 0;
+ }
