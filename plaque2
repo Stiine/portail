@@ -1,4 +1,30 @@
-imshow("Result", result);
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <tesseract/baseapi.h>
+#include <string>
+
+using namespace cv;
+using namespace std;
+using namespace tesseract;
+
+int main()
+{
+ Mat image = imread("/home/snir/Images/3m_droite2.jpg", IMREAD_GRAYSCALE);
+ imshow("Image", image);
+ waitKey();
+
+ Mat flou;
+ blur(image, flou, Size(3, 3));
+ imshow("Result", flou);
+ waitKey();
+
+ Mat result;
+ Canny(flou, result, 70, 150);
+ imshow("Result", result);
+ waitKey();
+
+ dilate(result, result, Mat());
+ imshow("Result", result);
  waitKey();
 
  blur(result, result, Size(19, 1));
@@ -57,22 +83,6 @@ imshow("Result", result);
  ocr.SetImage(plaque.data, plaque.cols, plaque.rows, 1, plaque.step);
  string numero = ocr.GetUTF8Text();
  cout << endl << "Plaque brute : " << numero;
-
-
-  switch (1)
-  {
-     case 'A': ("4");
-     break;
-
-     case 'E': ("3");
-     break;
-
-     case 'I': ("1");
-     break;
-
-     case 'D': ("0");
-     break;
-  }
 
  string correction;
 
